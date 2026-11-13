@@ -72,3 +72,34 @@ export async function releaseReservedOrderById(
     await databaseSession.endSession();
   }
 }
+
+export async function releaseExpiredReservations(
+  maximumOrders = 50,
+) {
+  await connectToDatabase();
+
+  const expiredOrders = await OrderModel.find({
+    inventoryStatus: "reserved",
+    reservationExpiresAt: {
+      $lte: new Date(),
+    },
+  })
+    .select("_id")
+    .limit(maximumOrders)
+    .lean();
+
+  let releasedOrders = 0;
+
+  for (const order of expiredOrders) {
+    const wasReleased = await releaseReservedOrderById(order._id);
+
+    if (wasReleased) {
+      releasedOrders += 1;
+    }
+  }
+
+  return {
+    checkedOrders: expiredOrders.length,
+    releasedOrders,
+  };
+}

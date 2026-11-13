@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { connectToDatabase } from "@/lib/mongodb";
+import { releaseExpiredReservations } from "@/lib/releaseReservation";
 import { getStripeClient } from "@/lib/stripe";
 import { OrderModel } from "@/models/order";
 import {
@@ -210,6 +211,7 @@ export async function POST(request: Request) {
         }
 
         await connectToDatabase();
+        await releaseExpiredReservations();
 
         const existingOrder = await OrderModel.findOne({
             checkoutRequestId,

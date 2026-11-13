@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { connectToDatabase } from "@/lib/mongodb";
-import { releaseReservedOrderById } from "@/lib/releaseReservation";
-import { OrderModel } from "@/models/order";
+import { releaseExpiredReservations } from "@/lib/releaseReservation";
 
 export const runtime = "nodejs";
-
-const maximumOrdersPerRun = 50;
 
 export async function GET(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
@@ -42,34 +38,11 @@ export async function GET(request: Request) {
   }
 
   try {
-    await connectToDatabase();
-
-    const expiredOrders = await OrderModel.find({
-      inventoryStatus: "reserved",
-      reservationExpiresAt: {
-        $lte: new Date(),
-      },
-    })
-      .select("_id")
-      .limit(maximumOrdersPerRun)
-      .lean();
-
-    let releasedOrders = 0;
-
-    for (const order of expiredOrders) {
-      const wasReleased = await releaseReservedOrderById(
-        order._id,
-      );
-
-      if (wasReleased) {
-        releasedOrders += 1;
-      }
-    }
+    const cleanupResult = await releaseExpiredReservations();
 
     return NextResponse.json({
       success: true,
-      checkedOrders: expiredOrders.length,
-      releasedOrders,
+      ...cleanupResult,
     });
   } catch (error) {
     console.error(
