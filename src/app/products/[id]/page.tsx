@@ -8,6 +8,7 @@ import { BuyNowButton } from "@/components/buyNowButton";
 import {
   ProductModel
 } from "@/models/product";
+import { Navbar } from "@/components/navbar";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -63,7 +64,7 @@ export default async function ProductPage({
 
   return (
     <>
-
+    <Navbar />
       <main className="min-h-screen bg-background px-4 py-12 sm:px-6 lg:px-10 lg:py-16">
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-10 lg:grid-cols-2 lg:gap-20">
