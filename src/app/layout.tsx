@@ -27,7 +27,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Zinna — Everyday Drip",
+    default: "Zinna",
     template: "%s | Zinna",
   },
   description:
