@@ -1,16 +1,14 @@
 import mongoose, { type Mongoose } from "mongoose";
 
 function getMongoUri(): string {
-  const uri = process.env.MONGODB_URI;
+  const uri = process.env.MONGODB_URI?.trim();
 
   if (!uri) {
-    throw new Error("MONGODB_URI is missing from .env.local");
+    throw new Error("MONGODB_URI is not configured");
   }
 
   return uri;
 }
-
-const mongoUri = getMongoUri();
 
 type MongooseCache = {
   connection: Mongoose | null;
@@ -34,7 +32,7 @@ export async function connectToDatabase() {
   }
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(mongoUri, {
+    cached.promise = mongoose.connect(getMongoUri(), {
       bufferCommands: false,
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 10000,
